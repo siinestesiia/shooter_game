@@ -91,7 +91,16 @@ image = pygame.load('directory/image.png').convert_alpha()
 
 #
 
-## 6. Using `rectangles` to position images:
+## 6. Creating `rectangles`:
+A must-do practice. ***Rectangles*** serves for displaying shapes, positioning images and detecting collisions. To create one, you need to make an instance of the class ***Rect*** and passing the arguments.
+
+```Python
+rectangle = pygame.Rect()
+```
+
+#
+
+## 7. Using `rectangles` to position images:
 * Define another variable for the rectangle that will store the image's width and height and also will define its ***origin point*** so it'll be easier to position the image on screen.
 
 ```Python
@@ -105,12 +114,32 @@ _It's always a good practice to use the ***rectangle*** for moving and placing t
 
 #
 
-# 7. Detecting `collisions`:
+# 8. Detecting `collisions`:
 * Detects if there's a collision between one rectangle and the other. Returns either ***0*** or ***1*** (***True*** or ***False***).
 
 ```Python
 # rect_1.colliderect(rect_2)
 image_rect.colliderect(image_2_rect)
+```
+
+# 9. Using `fonts`:
+The font module has to be initialize before using it. Otherwise you won't be able to display any text on screen.
+
+```Python
+pygame.font.init()
+```
+
+Then you can ***load*** and ***render*** the fonts you choose using a ***rectangle***.
+
+```Python
+example_font = pygame.font.Font('font_file', font_size)
+font_text = example_font.render('printed text', antialiasing, font_color)
+text_rect = font_text.get_rect(center = (x, y))
+```
+And last but not least, you'll have to display the text for each frame.
+
+```Python
+game_window.blit(font_text, text_rect)
 ```
 
 #

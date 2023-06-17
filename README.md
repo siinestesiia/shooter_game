@@ -1,4 +1,4 @@
-# *SHOOT THE TARGET*
+# *SHOOT THE TARGETS*
 
 ## Things to consider:
 
