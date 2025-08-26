@@ -24,6 +24,8 @@ class ShooterGame:
         
         self.run_game()
 
+        # Game flag.
+        self.is_running = True
 
     def run_game(self):
         # Font:
