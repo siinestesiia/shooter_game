@@ -1,113 +1,94 @@
 import pygame
-# Module for system-level operations and interactions.
-import sys
+from sys import exit
+from random import randint
 
-from settings import Settings
-
-
-class Reticle:
-    def __init__(self):
-        self.cursor_settings = Settings()
-        self.cursor_visible = pygame.mouse.set_visible(False) 
-        # Converting images is needed to make pygame work more easily.
-        self.reticle = pygame.image.load('resources/images/reticle.png').convert_alpha()
-    
-    def cursor_on_screen(self):
-        # gets the reticle rectangle to better handle its position.
-        self.reticle_rect = self.reticle.get_rect(center = (pygame.mouse.get_pos()))
-        # Draw the reticle on screen.
-        self.cursor_settings.screen.blit(self.reticle, self.reticle_rect)
-        return self.reticle_rect
-            
-
-class Target:
-    def __init__(self):
-        self.targ_settings = Settings()
-        self.target = pygame.image.load('resources/images/target.png').convert_alpha()
-        self.pos_x = self.targ_settings.target_pos_x
-        self.pos_y = self.targ_settings.target_pos_y
-        self.speed = self.targ_settings.target_speed
-
-    def target_on_screen(self):
-        self.target_rect = self.target.get_rect(center = (self.pos_x, self.pos_y))
-        
-        self.pos_x -= self.speed 
-
-        if self.pos_x < -100:
-            self.pos_x = self.targ_settings.target_pos_x
-
-        self.targ_settings.screen.blit(self.target, self.target_rect)
-        return self.target_rect
 
 class ShooterGame:
     def __init__(self):
         pygame.init()
-        pygame.mixer.init()
-        pygame.display.set_caption('Shooter Game')
-
-        self.settings = Settings()
-        self.target = Target()
-        self.cursor = Reticle()
-        self.screen = self.settings.screen
-        self.fps_limit = pygame.time.Clock()
-        self.is_running = True
-        self.points_gained = 0
+        pygame.font.init()
         
-        # sfx and music.
-        self.shot_sound_path = 'resources/sfx_and_music/gun_shot.mp3'
-        self.shot_sound = pygame.mixer.Sound(self.shot_sound_path)
+        # Display settings --------------------------------------------------------
+        self.window_size = (1000, 800)
+        self.screen = pygame.display.set_mode(self.window_size)
+        pygame.display.set_caption('Shoot the targets!')
+        self.bg_color = (120, 120, 100) # Temporary
+        self.clock = pygame.time.Clock()
+
+        # Cursor:
+        self.cursor_visible = pygame.mouse.set_visible(False)
+        self.reticle = pygame.image.load('resources/images/reticle.png').convert_alpha()
+        
+        # Target:
+        self.target = pygame.image.load('resources/images/target.png').convert_alpha()
+        
+        self.run_game()
 
 
-    def check_events(self):
-        self.point = 0
-        # Checks if Esc is pressed and exits the game.
-        for event in pygame.event.get():
-            # User clicks the x of the window.
-            if event.type == pygame.QUIT:
-                self.is_running = False
-            elif (event.type == pygame.KEYDOWN 
-                  and event.key == pygame.K_ESCAPE):
-                self.is_running = False
+    def run_game(self):
+        # Font:
+        self.font = pygame.font.Font('resources/fonts/arcadeclassic.ttf', 35)
+        self.game_over_font = pygame.font.Font('resources/fonts/arcadeclassic.ttf', 60)
             
-            # Checks for mouse input.
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button==1:
-                self.shot_sound.play()
-                # Checks if the target has been shot.
-                if (self.cursor.cursor_on_screen().colliderect
-                    (self.target.target_on_screen())):
-                    self.point += 1
-                else:
-                    pass
-            elif event.type == pygame.MOUSEBUTTONUP:
-                pass 
-        return self.point 
+        # Score and tries values:
+        self.init_score = 0
+        self.init_tries = 3
+        
+        self.target_pos = [-50, 400]
 
-    def scoring(self, score):
-        self.points_gained += int(score)
-        # Defines the type of font and its size.
-        self.font = pygame.font.Font('resources/images/comicz.ttf', 40)
-        # Defines the text, the antialiasing and its color.
-        self.points = self.font.render(f'Score: {self.points_gained}', True, 'Black')
-        self.settings.screen.blit(self.points, (5, 5))
-
-    def run_game(self): 
-        while self.is_running:
+        while True:
+            # Events -----------------------------------------------------------
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                # Collision and mouse clicks
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button==1:
+                    if self.reticle_rect.colliderect(self.target_rect):
+                        self.target_pos[0] = -50
+                        self.target_pos[1] = randint(50, 700)
+                        self.init_score += 1
+            
+            # Main Logic ---------------------------------------------------------
+            if self.init_score == 0:
+                self.target_pos[0] +=  .5
+            elif self.init_score > 0:
+                self.target_pos[0] += self.init_score
+            
+            if self.target_pos[0] > 1050:
+                self.target_pos[1] = randint(80, 750)
+                self.init_tries -= 1
+                self.target_pos[0] = -50
+            
+            elif self.init_tries <= 0:
+                print('Game Over!')
+                break
+            
+            # Update Section -----------------------------------------------------
             pygame.display.update()
+            self.clock.tick(60)
 
-            self.screen.fill(self.settings.bg_color)
-            self.points = self.check_events()
-            self.scoring(self.points)
-            self.target.target_on_screen()
-            self.cursor.cursor_on_screen()
+            self.target_rect = self.target.get_rect(center=self.target_pos)
             
+            # Font Related.            
+            self.score_mssg = self.font.render(f'Score {self.init_score}', True, 'Black')
+            self.score_rect = self.score_mssg.get_rect(topleft=(5, 0))
+            self.chances_mssg = self.font.render(f'Tries {self.init_tries}', True, 'Black')
+            self.chances_rect = self.chances_mssg.get_rect(topright=(995, 0))
 
-            self.fps_limit.tick(self.settings.fps)
-
-        
-        pygame.quit()
-        sys.exit()
-
-
+            # Updating surfaces on screen.
+            self.screen.fill((self.bg_color))
+            self.screen.blit(self.score_mssg, self.score_rect)
+            self.screen.blit(self.chances_mssg, self.chances_rect)
             
-shooter_game = ShooterGame()
-shooter_game.run_game()
+            # Target
+            self.screen.blit(self.target, self.target_rect)
+            # Cursor
+            self.reticle_rect = self.reticle.get_rect(center=pygame.mouse.get_pos())
+            self.screen.blit(self.reticle, self.reticle_rect)
+
+
+
+# ===================================================================================
+if __name__ == '__main__':
+    game = ShooterGame()

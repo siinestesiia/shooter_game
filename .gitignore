@@ -1,3 +1,4 @@
 # Ignored files and folders.
 
 temp_files
+__pycache__
