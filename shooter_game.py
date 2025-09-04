@@ -9,7 +9,7 @@ class ShooterGame:
         pygame.font.init()
         
         # Display settings --------------------------------------------------------
-        self.window_size = (1000, 800)
+        self.window_size = (1500, 800)
         self.screen = pygame.display.set_mode(self.window_size)
         pygame.display.set_caption('Shoot the targets!')
         self.bg_color = (120, 120, 100) # Temporary
@@ -17,27 +17,28 @@ class ShooterGame:
 
         # Cursor:
         self.cursor_visible = pygame.mouse.set_visible(False)
-        self.reticle = pygame.image.load('resources/images/reticle.png').convert_alpha()
+        self.reticle_surf = pygame.image.load(Reticle().sprite).convert_alpha()
+        self.reticle_rescaled = pygame.transform.scale_by(self.reticle_surf, .07)
         
         # Target:
-        self.target = pygame.image.load('resources/images/target.png').convert_alpha()
+        self.target_surf = pygame.image.load(Target().sprite).convert_alpha()
+        self.target_rescaled = pygame.transform.scale_by(self.target_surf, .10)
         
-        self.run_game()
-
-        # Game flag.
-        self.is_running = True
-
-    def run_game(self):
         # Font:
         self.font = pygame.font.Font('resources/fonts/arcadeclassic.ttf', 35)
         self.game_over_font = pygame.font.Font('resources/fonts/arcadeclassic.ttf', 60)
-            
+
         # Score and tries values:
         self.init_score = 0
         self.init_tries = 3
         
+        # Init target pos.
         self.target_pos = [-50, 400]
+        
+        self.run_game()
 
+
+    def run_game(self):
         while True:
             # Events -----------------------------------------------------------
             for event in pygame.event.get():
@@ -70,12 +71,14 @@ class ShooterGame:
             pygame.display.update()
             self.clock.tick(60)
 
-            self.target_rect = self.target.get_rect(center=self.target_pos)
+            self.target_rect = self.target_rescaled.get_rect(center=self.target_pos)
             
             # Font Related.            
             self.score_mssg = self.font.render(f'Score {self.init_score}', True, 'Black')
+            # Improve font position based on window size - - - - - !
             self.score_rect = self.score_mssg.get_rect(topleft=(5, 0))
             self.chances_mssg = self.font.render(f'Tries {self.init_tries}', True, 'Black')
+            # Improve font position based on window size - - - - - !
             self.chances_rect = self.chances_mssg.get_rect(topright=(995, 0))
 
             # Updating surfaces on screen.
@@ -84,11 +87,22 @@ class ShooterGame:
             self.screen.blit(self.chances_mssg, self.chances_rect)
             
             # Target
-            self.screen.blit(self.target, self.target_rect)
+            self.screen.blit(self.target_rescaled, self.target_rect)
             # Cursor
-            self.reticle_rect = self.reticle.get_rect(center=pygame.mouse.get_pos())
-            self.screen.blit(self.reticle, self.reticle_rect)
+            self.reticle_rect = self.reticle_rescaled.get_rect(center=pygame.mouse.get_pos())
+            self.screen.blit(self.reticle_rescaled, self.reticle_rect)
 
+
+# -----------------------------------------------------------------------------
+class Reticle:
+    def __init__(self):
+        self.sprite = 'resources/sprites/reticle.png'
+
+
+# --------------------------------------------------------------------------------
+class Target:
+    def __init__(self):
+        self.sprite = 'resources/sprites/round_target.png'
 
 
 # ===================================================================================

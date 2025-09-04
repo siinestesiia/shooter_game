@@ -2,7 +2,7 @@
 
 ## Things to consider:
 
-This is my first game using the `pygame`.
+This was my first game using the `pygame`, now I'm refactoring it to make it better.
 
 The idea of this project is to create a simple game from start
 to finish. This means having a ***title screen***, a gameplay with a ***score*** and a ***game over*** system, and the option to ***restart*** or ***quit*** the game. 
